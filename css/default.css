@@ -1,0 +1,94 @@
+
+/* Shadow Boxing {{{*/
+
+body:not([g_editable="true"]):before {
+content: "";
+position: fixed;
+top: -5px;
+right: -5px;
+width: 105%;
+height: 5px;
+
+box-shadow: 0px 0px 15px rgba(0,0,0,.8);
+-webkit-box-shadow: 0px 0px 15px rgba(0,0,0,.8);
+-moz-box-shadow: 0px 0px 5px rgba(0,0,0,.8);
+z-index: 100;
+}
+
+/*}}}*/
+
+/* Focus Highlighting {{{*/
+
+*:focus,
+input:focus,
+textbox:focus,
+textarea:focus {
+outline: 3px solid rgba(100,100,100, .1) !important;
+outline-offset: 1px !important;
+border-radius: 3px !important; 
+-webkit-border-radius: 3px !important; 
+-o-transition: outline 200ms linear;  
+-webkit-transition: outline 200ms linear;  
+}
+
+select:focus,
+input:not([type="checkbox"]):not([type="radio"]):focus {
+-o-appearance: none !important;
+appearance: none !important;
+-webkit-appearance: none !important;
+}
+/* }}} */
+
+/* Access Keys {{{*/
+
+body {font-family:"Segoe UI" !important;
+}
+
+label[accesskey]::after  ,
+legend[accesskey]::after  ,
+button[accesskey]::after  ,
+a[accesskey]::after,
+.vimiumHintMarker {
+    text-transform: uppercase !important;
+    border: black 1px solid !important;
+    outline: none !important;
+    font-weight: bold !important;
+    content: "[" attr(accesskey) "]" !important;
+    text-decoration: none !important;
+    color: #000 !important;
+    background-color: rgba(255,255,255,0.7) !important;
+    margin: auto 4px  !important;
+    border-radius: 2px;
+    -webkit-border-radius: 2px;
+    -moz-border-radius: 3px;
+    padding: .0125em .325em .225em .325em;
+    font-family: 'Segoe UI';
+    font-size: 6pt;
+    box-shadow: 1px 1px 3px black !important;
+    -webkit-box-shadow: 1px 1px 3px black !important;
+    -moz-box-shadow: 1px 1px 3px black !important;
+}
+.vimiumHintMarker > .matchingCharacter {
+    background-color: rgba(100,200,100,1) !important;
+
+}
+label[accesskey]:focus::after  ,
+legend[accesskey]:focus::after  ,
+button[accesskey]:focus::after  ,
+a[accesskey]:focus::after  ,
+label[accesskey]:hover::after  ,
+legend[accesskey]:hover::after  ,
+button[accesskey]:hover::after  ,
+a[accesskey]:hover::after  {
+ display: none !important;
+
+}
+
+
+a[accesskey]  {
+ white-space: nowrap !important;
+}
+
+/*}}}*/
+
+
