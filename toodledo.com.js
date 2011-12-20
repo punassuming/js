@@ -2,13 +2,14 @@
 // @name          ToodleDo Multi-Edit Tasks
 // @namespace     http://someuniquevaluetoavoidnamespaceconflicts09851243241.net
 // @description   basic <a href="https://addons.mozilla.org/firefox/addon/748" target="_blank">Greasemonkey</a> script
-// @include       http://www.toodledo.com/*
-// @include       http://*.toodledo.com/*
-// @include       https://*.toodledo.com/*
-// @exclude       http://*.toodledo.com/slim
-// @exclude       https://*.toodledo.com/slim
+// @include       http://www.toodledo.com/tasks/*
+// @include       http://*.toodledo.com/tasks/*
+// @include       https://*.toodledo.com/tasks/*
+// @exclude       http://*.toodledo.com/slim*
+// @exclude       https://*.toodledo.com/slim*
 // ==/UserScript==
 
+window.unsafeWindow = window;
 var POSTPONE_DAYS = 1; // default days to postpone
 var DEBUG = 0; // log messages to javascript console
 var PRIORITY_NEGATIVE = -1;
@@ -33,6 +34,208 @@ var prefs;
 var oldKeyboard;
 var newKeyboard;
 
+
+// ==UserScript==
+// @name Emulate Greasemonkey functions
+// @author TarquinWJ 
+// @namespace http://www.howtocreate.co.uk/ 
+// @version 1.1.1
+// @description  Attempts to replicate the Greasemonkey functions in
+//			Opera.
+// @ujs:category browser: enhancements
+// @ujs:published 2005-05-30 23:16
+// @ujs:modified 2005-10-27 12:57
+// @ujs:documentation http://userjs.org/scripts/browser/enhancements/aa-gm-functions 
+// @ujs:download http://userjs.org/scripts/download/browser/enhancements/aa-gm-functions.js
+// ==/UserScript==
+
+
+function GM_setValue( cookieName, cookieValue, lifeTime ) {
+	if( !cookieName ) { return; }
+	if( lifeTime == "delete" ) { lifeTime = -10; } else { lifeTime = 31536000; }
+	document.cookie = escape( cookieName ) + "=" + escape( cookieValue ) +
+		";expires=" + ( new Date( ( new Date() ).getTime() + ( 1000 * lifeTime ) ) ).toGMTString() + ";path=/";
+}
+
+function GM_getValue( cookieName, oDefault ) {
+	var cookieJar = document.cookie.split( "; " );
+	for( var x = 0; x < cookieJar.length; x++ ) {
+		var oneCookie = cookieJar[x].split( "=" );
+		if( oneCookie[0] == escape( cookieName ) ) {
+			try {
+				eval('var footm = '+unescape( oneCookie[1] ));
+			} catch(e) { return oDefault; }
+			return footm;
+		}
+	}
+	return oDefault;
+}
+
+function GM_deleteValue( oKey ) {
+	//yes, they didn't seem to provide a way to delete variables in Greasemonkey, and the user must use about:config to
+	//delete them - so the stored variables will pile up forever ...
+	GM_setValue( oKey, '', 'delete' );
+}
+
+var GM_falsifiedMenuCom = [], hasPageGMloaded = false;
+window.addEventListener('load',function () {hasPageGMloaded=true;doGMMeenoo();},false)
+function GM_registerMenuCommand( oText, oFunc ) {
+	GM_falsifiedMenuCom[GM_falsifiedMenuCom.length] = [oText,oFunc];
+	if( hasPageGMloaded ) { doGMMeenoo(); } //if the page has already loaded, do it now
+}
+
+function doGMMeenoo() {
+	if( !GM_falsifiedMenuCom.length ) { return; }
+	//create a menu of commands in the top corner
+	var foo = document.getElementById('GM_Falsify_me'), bar;
+	if( foo ) { document.body.removeChild(foo); }
+	foo = document.createElement('GMmenoo');
+	foo.id = 'GM_Falsify_me';
+	document.body.appendChild(foo);
+	with( foo.style ) {
+		border = '1px solid #000';
+		backgroundColor = '#bbf';
+		color = '#000';
+		position = 'fixed';
+		zIndex = '100000';
+		top = '0px';
+		right = '0px';
+		padding = '2px';
+		overflow = 'hidden';
+		height = '1.3em';
+	}
+	foo.appendChild(bar = document.createElement('b'))
+	bar.style.cursor = 'move';
+	bar.onclick = function () {
+		this.parentNode.style.left = this.parentNode.style.left ? '' : '0px';
+		this.parentNode.style.right = this.parentNode.style.right ? '' : '0px';
+	};
+	bar.appendChild(document.createTextNode('User Script Commands'));
+	foo.appendChild(bar = document.createElement('ul'));
+	bar.style.margin = '0px';
+	bar.style.padding = '0px';
+	bar.style.listStylePosition = 'inside';
+	for( var i = 0; GM_falsifiedMenuCom[i]; i++ ) {
+		var baz = document.createElement('li'), bing;
+		baz.appendChild(bing = document.createElement('a'));
+		bing.setAttribute('href','#');
+		bing.onclick = new Function('GM_falsifiedMenuCom['+i+'][1](arguments[0]);return false;');
+		bing.onfocus = function () { this.parentNode.style.height = ''; };
+		bing.onblur = function () { this.parentNode.style.height = '1.3em'; };
+		bing.appendChild(document.createTextNode(GM_falsifiedMenuCom[i][0]));
+		bar.appendChild(baz);
+	}
+	foo.onmouseover = function () { this.style.height = ''; };
+	foo.onmouseout = function () { this.style.height = '1.3em'; };
+}
+
+//yes, I know the limitations, but it's better than an outright error
+var GM_xmlhttpRequest = XMLHttpRequest;
+
+var GM_log = opera.postError;
+
+window._content = window;
+
+function getRecoverableString(oVar,notFirst) {
+	var oType = typeof(oVar);
+	if( ( oType == 'null' ) || ( oType == 'object' && !oVar ) ) {
+		//most browsers say that the typeof for null is 'object', but unlike a real
+		//object, it will not have any overall value
+		return 'null';
+	}
+	if( oType == 'undefined' ) { return 'window.uDfXZ0_d'; }
+	if( oType == 'object' ) {
+		//Safari throws errors when comparing non-objects with window/document/etc
+		if( oVar == window ) { return 'window'; }
+		if( oVar == document ) { return 'document'; }
+		if( oVar == document.body ) { return 'document.body'; }
+		if( oVar == document.documentElement ) { return 'document.documentElement'; }
+	}
+	if( oVar.nodeType && ( oVar.childNodes || oVar.ownerElement ) ) { return '{error:\'DOM node\'}'; }
+	if( !notFirst ) {
+		Object.prototype.toRecoverableString = function (oBn) {
+			if( this.tempLockIgnoreMe ) { return '{\'LoopBack\'}'; }
+			this.tempLockIgnoreMe = true;
+			var retVal = '{', sepChar = '', j;
+			for( var i in this ) {
+				if( i == 'toRecoverableString' || i == 'tempLockIgnoreMe' || i == 'prototype' || i == 'constructor' ) { continue; }
+				if( oBn && ( i == 'index' || i == 'input' || i == 'length' || i == 'toRecoverableObString' ) ) { continue; }
+				j = this[i];
+				if( !i.match(basicObPropNameValStr) ) {
+					//for some reason, you cannot use unescape when defining peoperty names inline
+					for( var x = 0; x < cleanStrFromAr.length; x++ ) {
+						i = i.replace(cleanStrFromAr[x],cleanStrToAr[x]);
+					}
+					i = '\''+i+'\'';
+				} else if( window.ActiveXObject && navigator.userAgent.indexOf('Mac') + 1 && !navigator.__ice_version && window.ScriptEngine && ScriptEngine() == 'JScript' && i.match(/^\d+$/) ) {
+					//IE mac does not allow numerical property names to be used unless they are quoted
+					i = '\''+i+'\'';
+				}
+				retVal += sepChar+i+':'+getRecoverableString(j,true);
+				sepChar = ',';
+			}
+			retVal += '}';
+			this.tempLockIgnoreMe = false;
+			return retVal;
+		};
+		Array.prototype.toRecoverableObString = Object.prototype.toRecoverableString;
+		Array.prototype.toRecoverableString = function () {
+			if( this.tempLock ) { return '[\'LoopBack\']'; }
+			if( !this.length ) {
+				var oCountProp = 0;
+				for( var i in this ) { if( i != 'toRecoverableString' && i != 'toRecoverableObString' && i != 'tempLockIgnoreMe' && i != 'prototype' && i != 'constructor' && i != 'index' && i != 'input' && i != 'length' ) { oCountProp++; } }
+				if( oCountProp ) { return this.toRecoverableObString(true); }
+			}
+			this.tempLock = true;
+			var retVal = '[';
+			for( var i = 0; i < this.length; i++ ) {
+				retVal += (i?',':'')+getRecoverableString(this[i],true);
+			}
+			retVal += ']';
+			delete this.tempLock;
+			return retVal;
+		};
+		Boolean.prototype.toRecoverableString = function () {
+			return ''+this+'';
+		};
+		Date.prototype.toRecoverableString = function () {
+			return 'new Date('+this.getTime()+')';
+		};
+		Function.prototype.toRecoverableString = function () {
+			return this.toString().replace(/^\s+|\s+$/g,'').replace(/^function\s*\w*\([^\)]*\)\s*\{\s*\[native\s+code\]\s*\}$/i,'function () {[\'native code\'];}');
+		};
+		Number.prototype.toRecoverableString = function () {
+			if( isNaN(this) ) { return 'Number.NaN'; }
+			if( this == Number.POSITIVE_INFINITY ) { return 'Number.POSITIVE_INFINITY'; }
+			if( this == Number.NEGATIVE_INFINITY ) { return 'Number.NEGATIVE_INFINITY'; }
+			return ''+this+'';
+		};
+		RegExp.prototype.toRecoverableString = function () {
+			return '\/'+this.source+'\/'+(this.global?'g':'')+(this.ignoreCase?'i':'');
+		};
+		String.prototype.toRecoverableString = function () {
+			var oTmp = escape(this);
+			if( oTmp == this ) { return '\''+this+'\''; }
+			return 'unescape(\''+oTmp+'\')';
+		};
+	}
+	if( !oVar.toRecoverableString ) { return '{error:\'internal object\'}'; }
+	var oTmp = oVar.toRecoverableString();
+	if( !notFirst ) {
+		//prevent it from changing for...in loops that the page may be using
+		delete Object.prototype.toRecoverableString;
+		delete Array.prototype.toRecoverableObString;
+		delete Array.prototype.toRecoverableString;
+		delete Boolean.prototype.toRecoverableString;
+		delete Date.prototype.toRecoverableString;
+		delete Function.prototype.toRecoverableString;
+		delete Number.prototype.toRecoverableString;
+		delete RegExp.prototype.toRecoverableString;
+		delete String.prototype.toRecoverableString;
+	}
+	return oTmp;
+}
+var basicObPropNameValStr = /^\w+$/, cleanStrFromAr = new Array(/\\/g,/'/g,/"/g,/\r/g,/\n/g,/\f/g,/\t/g,new RegExp('-'+'->','g'),new RegExp('<!-'+'-','g'),/\//g), cleanStrToAr = new Array('\\\\','\\\'','\\\"','\\r','\\n','\\f','\\t','-\'+\'->','<!-\'+\'-','\\\/');
 
 function preferences()
 {
@@ -60,7 +263,7 @@ function preferences()
     function _getPref(key)
     {
         //if (DEBUG) for (var i=0; i<keys.length; i+=2)
-        //	    log(keys[i] + ": " + map[keys[i]]);
+        //      log(keys[i] + ": " + map[keys[i]]);
         var val = map[key];
         if (val === undefined)
             throw ("Preferences has no value for key '" + key + "'" + " " + map[key]);
@@ -105,6 +308,7 @@ function preferences()
             "SHOW_EDIT_POSTPONE_LINK", true,
             "SHOW_EDIT_POSTPONE_X_DAYS_LINK", true,
             "SHOW_EDIT_SET_DUE_DATE_LINK", true,
+            "SHOW_EDIT_SET_START_DATE_LINK", true,
             "SHOW_EDIT_NEGATIVE_PRI_LINK", true,
             "SHOW_EDIT_LOW_PRI_LINK", true,
             "SHOW_EDIT_MEDIUM_PRI_LINK", true,
@@ -180,7 +384,7 @@ function createPrefsDiv()
     prefsDiv.className = "prefsDiv";
     prefsDiv.id = "prefsDiv";
     prefsDiv.style["border"] = "1px solid #600";
-    prefsDiv.style["margin"] = "5px 0 5px 0";
+    prefsDiv.style["margin"] = "75px 0 5px 0";
     prefsDiv.style["padding"] = "5px";
     prefsDiv.style["backgroundColor"] = "#ffe6e6";
     prefsDiv.style["fontWeight"] = "bold";
@@ -211,6 +415,7 @@ function createPrefsDiv()
     addPrefCheckboxCol(row, "Postpone", "SHOW_EDIT_POSTPONE_LINK");
     addPrefCheckboxCol(row, "Postpone X Days", "SHOW_EDIT_POSTPONE_X_DAYS_LINK");
     addPrefCheckboxCol(row, "Set Due Date", "SHOW_EDIT_SET_DUE_DATE_LINK");
+    addPrefCheckboxCol(row, "Set Start Date", "SHOW_EDIT_SET_START_DATE_LINK");
     addPrefCheckboxCol(row, "Negative", "SHOW_EDIT_NEGATIVE_PRI_LINK");
     addPrefCheckboxCol(row, "Low", "SHOW_EDIT_LOW_PRI_LINK");
     addPrefCheckboxCol(row, "Medium", "SHOW_EDIT_MEDIUM_PRI_LINK");
@@ -265,7 +470,8 @@ function createPrefsDiv()
     warning.appendChild(warningText);
     col.appendChild(warning);
     
-    document.getElementById("viewby").parentNode.insertBefore(prefsDiv, $("viewby"));
+    //document.getElementById("viewby").parentNode.insertBefore(prefsDiv, $("viewby"));
+    document.getElementById("tasks").appendChild(prefsDiv);
 }
 
 
@@ -394,21 +600,27 @@ function addDivTo(parentId, newId)
 /*
  * Add a link to the page
  */
-function addLinkToDiv(parentId, func, title, text)
+function addLinkToDiv(parentId, func, title, text, addBr)
 {
     var parentNode = $(parentId);
     if (parentNode)
     {
-    
+        if (!addBr)
+    {
         if ($$("#" + parentId + " a").length > 0)  
-            addTextToDiv(parentId, " | ");
+                addTextToDiv(parentId, " | ");
+    }
+
         var link = document.createElement("a");
         link.href = "javascript:void(0)";
         link.addEventListener("click", func, true);
         link.setAttribute("title", title);
         var linkContent = document.createTextNode(text);
         link.appendChild(linkContent);
+    if (addBr)
+        parentNode.insertBefore(document.createElement("br"), null);
         parentNode.insertBefore(link, null);
+
     }
     else
     {
@@ -482,7 +694,7 @@ function clearAllTasks()
  */
 function selectTasksByEachFunction(tasks, func)
 {
-    GM_log("tasks" + tasks);
+    //GM_log("tasks" + tasks);
     if (DEBUG) log("ADDITIVE: " + prefs.getPref("ADDITIVE_SELECT"));
     if (!prefs.getPref("ADDITIVE_SELECT"))
         clearAllTasks();
@@ -622,7 +834,7 @@ function selectAllOverdueTasks()
     var ruleInFunc = function(dueSpan)
     {
         var id = dueSpan.id.replace("due", "");
-        GM_log("date: " + $$("span[date!=0]"));
+        //GM_log("date: " + $$("span[date!=0]"));
         var taskDueDate = getTaskDueDate(dueSpan);
         var compareDate = new Date(today.getTime());
         
@@ -639,8 +851,8 @@ function selectAllOverdueTasks()
         var overdue = taskDueDate < compareDate;
         if (overdue)
             editTaskSelectedState($("edit"+id), true);
-    }
-    selectTasksByEachFunction($$("span[date!=0]"), ruleInFunc);
+    };
+    selectTasksByEachFunction($$("span[date!=0][id^=due]"), ruleInFunc);
 }
 
 
@@ -653,8 +865,8 @@ function selectAllTaskWithNoDueDates()
     {
         var id = dueSpan.id.replace("due", "");
         editTaskSelectedState($("edit"+id), true);
-    }
-    selectTasksByEachFunction($$("span[date=0]"), ruleInFunc);
+    };
+    selectTasksByEachFunction($$("span[date=0][id^=due]"), ruleInFunc);
 }
 
 
@@ -679,7 +891,7 @@ function selectAllTasksDueToday()
         if (taskDueDate.getTime() == today.getTime())
             editTaskSelectedState($("edit"+id), true);
     };
-    selectTasksByEachFunction($$("span[date]"), ruleInFunc);
+    selectTasksByEachFunction($$("span[date][id^=due]"), ruleInFunc);
 }
 
 
@@ -705,7 +917,7 @@ function selectAllTasksDueTomorrow()
         if (taskDueDate.getTime() == tomorrow.getTime())
             editTaskSelectedState($("edit"+id), true);
     };
-    selectTasksByEachFunction($$("span[date]"), ruleInFunc);
+    selectTasksByEachFunction($$("span[date][id^=due]"), ruleInFunc);
 }
 
 
@@ -759,7 +971,7 @@ function promptForTagValue(replace)
                 if (replace || isDefaultNoneTag(tagDiv)) oldValue = "";
                 if (oldValue.length > 0) oldValue += ", ";
                 return oldValue + escapeTags(tagValue);
-            }
+            };
             setTagValueForSelectedTasks(editTagFunc);
         }
     }
@@ -782,7 +994,7 @@ function removeTags()
             var editTagFunc = function(tagDiv)
             {
                 return "";
-            }
+            };
             setTagValueForSelectedTasks(editTagFunc);
         }
     }
@@ -806,6 +1018,7 @@ function promptRenameTag()
             strs[0] = trim(strs[0]);
             strs[1] = trim(strs[1]);
             if (strs[0].length < 1 || strs[1].length < 1)
+
                 throw ("Invalid rename-tag string.  Neither string can have 0 length");
             
             var setTagValueFunc = function(oldValue)
@@ -832,7 +1045,7 @@ function promptRenameTag()
         showMessage(e);
         throw e;
     }
-}
+    }
 */
 
 
@@ -864,7 +1077,7 @@ function promptRemoveTag()
                     }
                 }
                 return newTags.toString();
-            }
+            };
             setTagValueForSelectedTasks(removeTagFunc);
         }
     }
@@ -880,7 +1093,7 @@ function cloneSelectedTasks()
         {
             var id = checkbox.id.replace("edit", "");
             jsobj.duplicateTask(id);
-        }
+        };
         showMessage("Page will refresh...");
         editSelectedTasks(cloneTagFunc, prefs.getPref("REFRESH_AFTER_EDIT_TAG"));
         //editSelectedTasks(cloneTagFunc, true);
@@ -898,18 +1111,17 @@ function deleteSelectedTasks()
             var deleteTagFunc = function(checkbox)
             {
                 var id = checkbox.id.replace("edit", "");
-                var c=$("tasks").readAttribute("user");
+                var c=$("tasks").getAttribute("user");
                 new jsobj.Ajax.Request("/ajax/delete_task.php",{method:"post",postBody:"id="+id+"&u="+c,onSuccess:jsobj.taskDeleted});
                 $$(".parent"+id).invoke("remove");
-                $("row"+id).remove();
-            }
+                XPCNativeWrapper.unwrap($("row"+id)).remove;
+            };
             editSelectedTasks(deleteTagFunc, prefs.getPref("REFRESH_AFTER_EDIT_TAG"));
             //editSelectedTasks(deleteTagFunc, true);
         }
     }
     else showMessage("Please select tasks to delete.");
 }
-
 
 function setTagValueForSelectedTasks(setTagValueFunc)
 {
@@ -924,10 +1136,9 @@ function setTagValueForSelectedTasks(setTagValueFunc)
             $("tagdiv").setAttribute("tid", id);
             $("tagdiv").setAttribute("prefix", $("tag" + id).innerHTML.match("Tag:"));
             $("edtag").value = setTagValueFunc($("tag" + id));
-            
-            jsobj.saveTag(id, $("tagdiv").readAttribute("prefix"));
+            jsobj.saveTag(id, $("tag" + id).innerHTML);
             jsobj.closeTag();
-        }
+        };
         editSelectedTasks(editTagFunc, prefs.getPref("REFRESH_AFTER_EDIT_TAG"));
     }
     else showMessage("Please select tasks to rename tags");
@@ -1055,6 +1266,39 @@ function callSetDueDatePrompt()
 
 
 /*
+ *
+ */
+function callSetStartDatePrompt()
+{
+    if (getAllSelectedTaskCheckboxes().length > 0)
+    {
+        var tmp = prompt("Start Date?");
+        if (tmp && typeof tmp == "string")
+        {
+            var date = getDateFromString(tmp);
+            if (date)
+                tmp = tmp.replace(date, "");
+            else
+                date = "today";
+
+            var time = getTimeFromString(tmp);
+            if (time)
+                NEW_TIME_STRING = time;
+            else
+                NEW_TIME_STRING = "";
+
+            NEW_DATE_STRING = date;
+            setSelectedStartDates(setStartDatePrompt);
+        }
+    }   
+    else
+    {
+        showMessage("Please select tasks to set Start Date");
+    }
+}
+
+
+/*
  * Shamelessly borrowed from Rememberthemilk.com
  */
 function getDateFromString(str)
@@ -1138,7 +1382,7 @@ function getDateFromString(str)
 function getTimeFromString(str)
 {
     var timeRE1 = /(@|at|,)?\s*([0-9]+)(?::|\.|\u0020\u0068\u0020|\u6642|h)([0-9]+)(?:\u5206)?\s*(am|a|pm|p|\u4e0a|\u4e0b|\u5348\u524d|\u5348\u5f8c|\uc624\uc804|\uc624\ud6c4)?/i;
-    var timeRE2 = /(@|at)?\s*([^/][0-9]{3,4})\s*(a|p|\u4e0a|\u4e0b|\u5348\u524d|\u5348\u5f8c|\uc624\uc804|\uc624\ud6c4)?/i;
+    var timeRE2 = /(@|at)?\s*([^\/][0-9]{3,4})\s*(a|p|\u4e0a|\u4e0b|\u5348\u524d|\u5348\u5f8c|\uc624\uc804|\uc624\ud6c4)?/i;
     var timeRE3 = /(@|at)?\s*([0-9]{1,2})\s*(a|p|\u4e0a|\u4e0b|\u5348\u524d|\u5348\u5f8c|\uc624\uc804|\uc624\ud6c4)?/i;
     
     if (DEBUG) log("getTimeFromString: Looking for time in '" + str + "'");
@@ -1220,6 +1464,55 @@ function setDueDateString(dateStr, timeStr)
 
 
 /*
+ *
+ */
+function setStartDatePrompt(startSpan)
+{
+    setStartDateString(NEW_DATE_STRING, NEW_TIME_STRING);
+}
+
+
+/*
+ * Set the task due date to a specific string
+ */
+function setStartDateString(dateStr, timeStr)
+{
+    try
+    {
+        if (DEBUG) log("setStartDateString\tdateStr: '" + dateStr + "'\ttime: '" + timeStr);
+        var dts = document.getElementById("dts");
+        if (dts)
+            dts.value = dateStr;
+        else throw ("Attempting to set start date with no $('dts')");
+
+        if (timeStr)
+        {
+            if ($("tts"))
+            {
+                $("tts").value = timeStr;
+                if (DEBUG) log("set tts to '" + timeStr + "'");
+            }   
+            else
+            {
+                throw("Failed to set time '" + timeStr + "' for task.  Most likely your preferences are set to not display 'start time'");
+            }
+        }
+        else if ($("tts"))
+        {
+            $("tts").value = ""; // User wants a time, and we don't have one to give
+        }
+        jsobj.saveStartDateTime();
+    }
+    catch (e)
+    {
+        showMessage(e);
+        throw e;
+    }
+}
+
+
+
+/*
  * Postpone all the selected tasks
  */
 function setSelectedDueDates(func)
@@ -1243,37 +1536,61 @@ function setSelectedDueDates(func)
 }
 
 
+/*
+ * Postpone(startdate) all the  selected tasks
+ */
+function setSelectedStartDates(func)
+{
+    var updateFunction = function(task)
+    {
+        var id = task.id.replace("edit", "");
+        if (id)
+        {
+            var startSpan = jsobj.document.getElementById("std" + id);
+            if (startSpan)
+            {
+                var startdiv = jsobj.document.getElementById("startdiv");
+                startdiv.setAttribute("prefix", "0");
+                startdiv.setAttribute("did", id);
+                func(startSpan);
+            }
+        }
+    };
+    editSelectedTasks(updateFunction, prefs.getPref("REFRESH_AFTER_EDIT_DATE"));
+}
+
+
 function changePriorityToNegativeForSelectedTasks()
 {
-    changePriortyToXForSelectedTasks(PRIORITY_NEGATIVE);
+    changePriorityToXForSelectedTasks(PRIORITY_NEGATIVE);
 }
 
 
 function changePriorityToLowForSelectedTasks()
 {
-    changePriortyToXForSelectedTasks(PRIORITY_LOW);
+    changePriorityToXForSelectedTasks(PRIORITY_LOW);
 }
 
 
 function changePriorityToMediumForSelectedTasks()
 {
-    changePriortyToXForSelectedTasks(PRIORITY_MEDIUM);
+    changePriorityToXForSelectedTasks(PRIORITY_MEDIUM);
 }
 
 
 function changePriorityToHighForSelectedTasks()
 {
-    changePriortyToXForSelectedTasks(PRIORITY_HIGH);
+    changePriorityToXForSelectedTasks(PRIORITY_HIGH);
 }
 
 
 function changePriorityToTopForSelectedTasks()
 {
-    changePriortyToXForSelectedTasks(PRIORITY_TOP);
+    changePriorityToXForSelectedTasks(PRIORITY_TOP);
 }
 
 
-function changePriortyToXForSelectedTasks(priNum)
+function changePriorityToXForSelectedTasks(priNum)
 {
     var selectedTasks = getAllSelectedTaskCheckboxes();
     if (selectedTasks.length > 0)
@@ -1285,8 +1602,10 @@ function changePriortyToXForSelectedTasks(priNum)
             {
                 var pri = $("pri" + id);
                 jsobj.editPri(pri, id);
-                $("irp" + id).value = priNum;
-                jsobj.savePri(id, pri.innerHTML.match("Priority:"));
+                var irp = $("irp" + id);
+                irp.value = priNum;
+                irp.blur();
+                //jsobj.savePri(id, pri.innerHTML.match("Priority:"));
             }
         };
         editSelectedTasks(func, prefs.getPref("REFRESH_AFTER_EDIT_PRIORITY"));
@@ -1326,8 +1645,9 @@ function editSelectedTasks(func, refresh)
  */
 function handleKeyPress(a)
 {
-    var Event = jsobj.Event;
-    var b = Event.element(a), c = a.charCode ? a.charCode : a.which ? a.which : a.keyCode;
+    //var Event = jsobj.Event;
+    //var b = Event.element(a), c = a.charCode ? a.charCode : a.which ? a.which : a.keyCode;
+    var b = a.target, c = a.charCode ? a.charCode : a.which ? a.which : a.keyCode;
     c = a.keyCode;
     if (DEBUG) log("keypressed: " + c + "\tchar: " + String.fromCharCode(c));// + "\na: " + a + "\nb: " + b + "(" + b.tagName + ")");
     if (a.ctrlKey && a.altKey && !a.metaKey && b.descendantOf("addtask"))
@@ -1342,6 +1662,7 @@ function handleKeyPress(a)
     {
         c == 8226 && b.descendantOf("addtask");
     }
+    
     if (!a.metaKey)
     {
         if (!a.ctrlKey)
@@ -1404,9 +1725,10 @@ function handleKeyPress(a)
 /*
  * Override the swap_tabs function to insert checkboxes
  */
-function newUpdateStatus()
+function newUpdateStatus(a,b)
 {
-    oldUpdateStatus();
+    GM_log("a: " + a + "\tb: " + b);
+    oldUpdateStatus(a,b);
     insertCustomElements(false);
 }
 
@@ -1416,7 +1738,7 @@ function newUpdateStatus()
  */
 function refreshCurrentTab()
 {
-    jsobj.swap_tabs($("tabs").down(".tabon").getAttribute("val"));
+    jsobj.swap_tabs(XPCNativeWrapper.unwrap($("tabs")).down(".tabon").getAttribute("val"));
 }
 
 
@@ -1446,8 +1768,9 @@ function clearMessages()
  */
 function handleEditFooterClick(a)
 {
-    var Event = jsobj.Event;
-    var b = Event.element(a), c = a.charCode ? a.charCode : a.which ? a.which : a.keyCode;
+    //var Event = jsobj.Event;
+    //var b = Event.element(a), c = a.charCode ? a.charCode : a.which ? a.which : a.keyCode;
+    //var b = Event.element(a), c = a.charCode ? a.charCode : a.which ? a.which : a.keyCode;
     if (a.target.tagName.toUpperCase() != "A")
         toggleEditFooter();
 }
@@ -1469,13 +1792,12 @@ function createDivStyle()
  */
 function createLinksDiv(addStaticLinks)
 {
-    
     // @TODO MOVE THIS CODE TO WHEREEVER IT BELONGS
     if (addStaticLinks)
     {
         if (prefs.getPref("USE_POPUP_LINKS"))
-            addLinkToDiv("toolbar", toggleEditFooter, "Toggle Edit Links (e)", "Toggle Select/Edit Links");
-        addLinkToDiv("toolbar", editPrefs, "MultiEdit Preferences", "MultiEdit Preferences");
+            addLinkToDiv("left_side", toggleEditFooter, "Toggle Edit Links (e)", "Toggle Select/Edit Links", true);
+        addLinkToDiv("left_side", editPrefs, "MultiEdit Preferences", "MultiEdit Preferences", true);
     }
     
     if (prefs.getPref("USE_POPUP_LINKS"))
@@ -1495,7 +1817,7 @@ function createLinksDiv(addStaticLinks)
     }
     else
     {
-        return "toolbar";
+        return "left_side";
     }
 }
 
@@ -1505,18 +1827,21 @@ function createLinksDiv(addStaticLinks)
  */
 function createMessagesDiv()
 {
+
+
     var messagesDiv = document.createElement('div');
     messagesDiv.className = "messagesDiv";
     messagesDiv.id = "messagesDiv";
     messagesDiv.style["border"] = "1px solid #600";
-    messagesDiv.style["margin"] = "5px 0 5px 0";
+    messagesDiv.style["margin"] = "75px 0 5px 0";
     messagesDiv.style["padding"] = "5px";
     messagesDiv.style["backgroundColor"] = "#ffe6e6";
     messagesDiv.style["fontWeight"] = "bold";
     messagesDiv.style["fontSize"] = "medium";
     messagesDiv.setAttribute("onclick", "$(\"messagesDiv\").style['visibility'] = 'hidden';");
     messagesDiv.style["visibility"] = "hidden";
-    document.getElementById("viewby").parentNode.insertBefore(messagesDiv, $("viewby"));
+    //document.getElementById("viewby").parentNode.insertBefore(messagesDiv, $("viewby"));
+    document.getElementById("tasks").appendChild(messagesDiv);
 }
 
 
@@ -1592,6 +1917,17 @@ function insertEditTaskDueDateLinks(divId)
     if (prefs.getPref("SHOW_EDIT_SET_DUE_DATE_LINK"))
         addLinkToDiv(divId, callSetDueDatePrompt, "Set Due Date (d)", "Set Due Date");
 }
+
+
+/*
+ * Insert links to edit task due dates
+ */
+function insertEditTaskStartDateLinks(divId)
+{
+    if (prefs.getPref("SHOW_EDIT_SET_START_DATE_LINK"))
+        addLinkToDiv(divId, callSetStartDatePrompt, "Set Start Date (d)", "Set Start Date");
+}
+
 
 
 /*
@@ -1718,6 +2054,7 @@ function insertEditLinks(divId)
         addTextToDiv(editTasksDivId, "  Edit:", "padding-right: 20px; font-weight: bold;");
         // Comment out the following lines to change which links appear.
         insertEditTaskDueDateLinks(editTasksDivId);
+        insertEditTaskStartDateLinks(editTasksDivId);
         insertEditTaskPriorityLinks(editTasksDivId);
         insertEditTaskTagLinks(editTasksDivId);
         insertEditTaskCloneLink(editTasksDivId);
@@ -1756,6 +2093,12 @@ function insertEditCheckbox(taskSpan)
 function newGotSubs(a)
 {
     oldGotSubs(a);
+    $$("div.subtasks[id=subtasks" + a + "] span.task").each(function(subtaskSpan)
+    {
+        insertEditCheckbox(subtaskSpan);
+    });
+    /*
+    oldGotSubs(a);
     $("row" + a).getElementsBySelector("div.subtasks[id=subtasks" + a + "]").each(function(rowDiv)
     {
         if (rowDiv.getElementsBySelector("input[id^='edit']").size() == 0)
@@ -1766,6 +2109,7 @@ function newGotSubs(a)
             });
         }
     });
+    */
 }
 
 
@@ -1819,13 +2163,14 @@ try
 {
     String.prototype.trim = function(str) {return str.replace(/^\s\s*/, "").replace(/\s\s*$/, "");};
     
-    jsobj = window.wrappedJSObject;
+    //jsobj = window.wrappedJSObject;
     jsobj = unsafeWindow;
-    $$ = jsobj.$$;
+    //jsobj = window.wrappedJSObject;
+    //$$ = jsobj.$$;
     $$ = jsobj['$$'];
     $ = jsobj.$;
     $A = jsobj.$A;
-    
+
     oldGotSubs = jsobj.gotSubs;
     jsobj.gotSubs = newGotSubs;
     
@@ -1837,15 +2182,15 @@ try
     var onload = function()
     {
         if (prefs.getPref("OVERRIDE_KEYBOARD"))
-		{
-		    jsobj.window.removeEventListener("keydown", jsobj.keyboard, false);
+        {
+          jsobj.window.removeEventListener("keydown", jsobj.keyboard, false);
             jsobj.window.addEventListener("keydown", handleKeyPress, false);
-	    }
-	    oldUpdateStatus = jsobj.updateStatus;
+        }
+        oldUpdateStatus = jsobj.updateStatus;
         jsobj.updateStatus = newUpdateStatus;
         
-    }
-	window.addEventListener("load", onload, false);
+    };
+    window.addEventListener("load", onload, false);
 
     loadPreferences();
     
@@ -1853,3 +2198,4 @@ try
         insertCustomElements(true);
 }
 catch(e){alert(e);throw e;};
+
