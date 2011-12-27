@@ -10,7 +10,6 @@
 // ==/UserScript==
 
 window.unsafeWindow = window;
-var POSTPONE_DAYS = 1; // default days to postpone
 var DEBUG = 0; // log messages to javascript console
 var PRIORITY_NEGATIVE = -1;
 var PRIORITY_LOW = 0;
@@ -78,7 +77,7 @@ function GM_deleteValue( oKey ) {
 }
 
 var GM_falsifiedMenuCom = [], hasPageGMloaded = false;
-window.addEventListener('load',function () {hasPageGMloaded=true;doGMMeenoo();},false)
+window.addEventListener('load',function () {hasPageGMloaded=true;doGMMeenoo();},false);
 function GM_registerMenuCommand( oText, oFunc ) {
 	GM_falsifiedMenuCom[GM_falsifiedMenuCom.length] = [oText,oFunc];
 	if( hasPageGMloaded ) { doGMMeenoo(); } //if the page has already loaded, do it now
@@ -104,7 +103,7 @@ function doGMMeenoo() {
 		overflow = 'hidden';
 		height = '1.3em';
 	}
-	foo.appendChild(bar = document.createElement('b'))
+	foo.appendChild(bar = document.createElement('b'));
 	bar.style.cursor = 'move';
 	bar.onclick = function () {
 		this.parentNode.style.left = this.parentNode.style.left ? '' : '0px';
@@ -1793,12 +1792,11 @@ function createDivStyle()
 function createLinksDiv(addStaticLinks)
 {
     // @TODO MOVE THIS CODE TO WHEREEVER IT BELONGS
-    if (addStaticLinks)
-    {
-        if (prefs.getPref("USE_POPUP_LINKS"))
-            addLinkToDiv("left_side", toggleEditFooter, "Toggle Edit Links (e)", "Toggle Select/Edit Links", true);
-        addLinkToDiv("left_side", editPrefs, "MultiEdit Preferences", "MultiEdit Preferences", true);
-    }
+    // if (addStaticLinks)
+    //     if (prefs.getPref("USE_POPUP_LINKS"))
+    //         addLinkToDiv("left_side", toggleEditFooter, "Toggle Edit Links (e)", "Toggle Select/Edit Links", true);
+    //     addLinkToDiv("left_side", editPrefs, "MultiEdit Preferences", "MultiEdit Preferences", true);
+        // var LOADED=1  
     
     if (prefs.getPref("USE_POPUP_LINKS"))
     {
@@ -1988,10 +1986,14 @@ function insertEditTaskDeleteLink(divId)
 
 function toggleEditFooter()
 {
+    var prefsDiv = $("prefsDiv");
+    if (!prefsDiv) throw ("Preferences div not loaded!!!");
+    prefsDiv.style["visibility"] = prefsDiv.style["visibility"] == "hidden" ? "visible" : "hidden";
+
     var editFooter = document.getElementById("editFooter");
     if (editFooter)
     {
-    
+
         var visible = (editFooter.style["visibility"] == "visible") ? false : true;
         editFooter.style["visibility"] = visible ? "visible" : "hidden";
         //prefs.savePref("SHOW_EDIT_FOOTER_PREF", visible);
@@ -2159,43 +2161,50 @@ function importPrototypeScripts()
 /*
  * This is the main function.  Execution of the script begins here.
  */
-try
+window.addEventListener('unload',loadEvents, false);
+function loadEvents()
 {
-    String.prototype.trim = function(str) {return str.replace(/^\s\s*/, "").replace(/\s\s*$/, "");};
-    
-    //jsobj = window.wrappedJSObject;
-    jsobj = unsafeWindow;
-    //jsobj = window.wrappedJSObject;
-    //$$ = jsobj.$$;
-    $$ = jsobj['$$'];
-    $ = jsobj.$;
-    $A = jsobj.$A;
-
-    oldGotSubs = jsobj.gotSubs;
-    jsobj.gotSubs = newGotSubs;
-    
-    oldTaskDuplicated = jsobj.taskDuplicated;
-    jsobj.taskDuplicated = newTaskDuplicated;
-    
-    oldKeyboard = jsobj.keyboard;
-    
-    var onload = function()
+    try
     {
-        if (prefs.getPref("OVERRIDE_KEYBOARD"))
-        {
-          jsobj.window.removeEventListener("keydown", jsobj.keyboard, false);
-            jsobj.window.addEventListener("keydown", handleKeyPress, false);
-        }
-        oldUpdateStatus = jsobj.updateStatus;
-        jsobj.updateStatus = newUpdateStatus;
-        
-    };
-    window.addEventListener("load", onload, false);
+        String.prototype.trim = function(str) {return str.replace(/^\s\s*/, "").replace(/\s\s*$/, "");};
 
-    loadPreferences();
-    
-    if ($("tasks"))
-        insertCustomElements(true);
+        //jsobj = window.wrappedJSObject;
+        jsobj = unsafeWindow;
+        //jsobj = window.wrappedJSObject;
+        //$$ = jsobj.$$;
+        $$ = jsobj['$$'];
+        $ = jsobj.$;
+        $A = jsobj.$A;
+
+        oldGotSubs = jsobj.gotSubs;
+        jsobj.gotSubs = newGotSubs;
+
+        oldTaskDuplicated = jsobj.taskDuplicated;
+        jsobj.taskDuplicated = newTaskDuplicated;
+
+        oldKeyboard = jsobj.keyboard;
+
+        var onload = function()
+        {
+            if (prefs.getPref("OVERRIDE_KEYBOARD"))
+            {
+                jsobj.window.removeEventListener("keydown", jsobj.keyboard, false);
+                jsobj.window.addEventListener("keydown", handleKeyPress, false);
+            }
+            oldUpdateStatus = jsobj.updateStatus;
+            jsobj.updateStatus = newUpdateStatus;
+
+        };
+        window.addEventListener("load", onload, false);
+
+        loadPreferences();
+
+        if ($("tasks"))
+            insertCustomElements(true);
+    }
+    catch(e){alert(e);throw e;};
 }
-catch(e){alert(e);throw e;};
+loadEvents();
+// fix reloading issue
+window.addEventListener("click", function() { if (document.getElementById('editFooter') == null) {loadEvents();};}, false);
 
