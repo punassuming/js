@@ -9,7 +9,7 @@
 // @exclude       https://*.toodledo.com/slim*
 // ==/UserScript==
 
-window.unsafeWindow = window;
+unsafeWindow = window;
 var DEBUG = 0; // log messages to javascript console
 var PRIORITY_NEGATIVE = -1;
 var PRIORITY_LOW = 0;
@@ -83,55 +83,10 @@ function GM_registerMenuCommand( oText, oFunc ) {
 	if( hasPageGMloaded ) { doGMMeenoo(); } //if the page has already loaded, do it now
 }
 
-function doGMMeenoo() {
-	if( !GM_falsifiedMenuCom.length ) { return; }
-	//create a menu of commands in the top corner
-	var foo = document.getElementById('GM_Falsify_me'), bar;
-	if( foo ) { document.body.removeChild(foo); }
-	foo = document.createElement('GMmenoo');
-	foo.id = 'GM_Falsify_me';
-	document.body.appendChild(foo);
-	with( foo.style ) {
-		border = '1px solid #000';
-		backgroundColor = '#bbf';
-		color = '#000';
-		position = 'fixed';
-		zIndex = '100000';
-		top = '0px';
-		right = '0px';
-		padding = '2px';
-		overflow = 'hidden';
-		height = '1.3em';
-	}
-	foo.appendChild(bar = document.createElement('b'));
-	bar.style.cursor = 'move';
-	bar.onclick = function () {
-		this.parentNode.style.left = this.parentNode.style.left ? '' : '0px';
-		this.parentNode.style.right = this.parentNode.style.right ? '' : '0px';
-	};
-	bar.appendChild(document.createTextNode('User Script Commands'));
-	foo.appendChild(bar = document.createElement('ul'));
-	bar.style.margin = '0px';
-	bar.style.padding = '0px';
-	bar.style.listStylePosition = 'inside';
-	for( var i = 0; GM_falsifiedMenuCom[i]; i++ ) {
-		var baz = document.createElement('li'), bing;
-		baz.appendChild(bing = document.createElement('a'));
-		bing.setAttribute('href','#');
-		bing.onclick = new Function('GM_falsifiedMenuCom['+i+'][1](arguments[0]);return false;');
-		bing.onfocus = function () { this.parentNode.style.height = ''; };
-		bing.onblur = function () { this.parentNode.style.height = '1.3em'; };
-		bing.appendChild(document.createTextNode(GM_falsifiedMenuCom[i][0]));
-		bar.appendChild(baz);
-	}
-	foo.onmouseover = function () { this.style.height = ''; };
-	foo.onmouseout = function () { this.style.height = '1.3em'; };
-}
-
 //yes, I know the limitations, but it's better than an outright error
 var GM_xmlhttpRequest = XMLHttpRequest;
 
-var GM_log = opera.postError;
+var GM_log = console.log;
 
 window._content = window;
 
@@ -2142,40 +2097,40 @@ function escapeTags(str)
 /**
  * Override Prototype scripts.  DO NOT USE!  BROKEN!
  */
-function importPrototypeScripts()
-{
-    var scripts = 
-    [
-    'https://ajax.googleapis.com/ajax/libs/prototype/1.7.0.0/prototype.js'
-    ];
-    
-    for (i in scripts)
-    {
-        var script = document.createElement('script');
-        script.src = scripts[i];
-        document.getElementsByTagName('head')[0].appendChild(script);
-    }
-}
+// function importPrototypeScripts()
+// {
+//     var scripts = 
+//     [
+//     'https://ajax.googleapis.com/ajax/libs/prototype/1.7.0.0/prototype.js'
+//     ];
+//     
+//     for (i in scripts)
+//     {
+//         var script = document.createElement('script');
+//         script.src = scripts[i];
+//         document.getElementsByTagName('head')[0].appendChild(script);
+//     }
+// }
 
 
 /*
  * This is the main function.  Execution of the script begins here.
  */
-window.addEventListener('unload',loadEvents, false);
 function loadEvents()
 {
     try
     {
         String.prototype.trim = function(str) {return str.replace(/^\s\s*/, "").replace(/\s\s*$/, "");};
 
+        
         //jsobj = window.wrappedJSObject;
         jsobj = unsafeWindow;
         //jsobj = window.wrappedJSObject;
-        //$$ = jsobj.$$;
-        $$ = jsobj['$$'];
+        $$ = jsobj.$$;
+        // $$ = jsobj['$$'];
         $ = jsobj.$;
         $A = jsobj.$A;
-
+        
         oldGotSubs = jsobj.gotSubs;
         jsobj.gotSubs = newGotSubs;
 
@@ -2204,7 +2159,9 @@ function loadEvents()
     }
     catch(e){alert(e);throw e;};
 }
-loadEvents();
 // fix reloading issue
-window.addEventListener("click", function() { if (document.getElementById('editFooter') == null) {loadEvents();};}, false);
-
+if (window.opera)
+{
+window.addEventListener("click", function() { if ($('editFooter') == null) {loadEvents();};}, false);
+window.addEventListener('DOMContentLoaded',loadEvents, false);
+}

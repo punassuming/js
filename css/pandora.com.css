@@ -1,0 +1,11 @@
+@-moz-document url-prefix("http://www.pandora.com/") {
+body {background: none !important; }
+#footer {display: none !important; }
+#container, #content  {top: 0 !important; left: 0 !important; margin: 0px !important; padding: 0 !important;}
+.tuner {background: none !important; } 
+#radio, #TunerEmbed, #TunerContainer,.tuner,#container,#content {display: block !important; float: left !important; width: 640px !important; height: 620px !important;max-width: 640px !important; margin-left: auto !important; margin-right: auto !important;}
+
+#container {}
+#google_adwords {left: 0px !important;}
+}
+}

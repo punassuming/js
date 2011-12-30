@@ -1,0 +1,12 @@
+#list > li > .title {font-size: 70%; margin-right: -120px; }
+#list > li > small > .check, #list > li > small > .text {visibility: collapse;}
+#list > li:hover .check, #list > li:hover .text {visibility: visible; bottom: 2px; top: auto !important;}
+
+#list > li {margin: 2px !important; -o-border-radius: 1px !important;}
+#list > li:hover {background: -o-linear-gradient(#eee,#CACACA) !important; -o-border-radius: 3px !important; box-shadow: 0px 0px 4px black !important;z-index: 1000 !important;}
+
+#content {padding: 10px;}
+
+#container {min-width: 200px !important; width: 100% !important; max-width: 640px !important;}
+#text_toolbar {position:fixed !important;opacity: 0.7 !important}
+

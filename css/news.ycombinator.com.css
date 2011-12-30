@@ -1,0 +1,65 @@
+  #non-existent-id {}
+
+  #csres { display: none; }
+
+  .title {
+    font-size: 120% !important;
+  }
+
+  .subtext {
+    font-size: 90% !important;
+  }
+
+  * {
+    font-family: Helvetica !important;
+    line-height: 1.4 !important;
+  }
+
+  body {
+    padding: 10px !important;
+    background: #F6F6EF;
+  }
+
+  body > center > table {
+    width: 100% !important;
+  }
+
+  body > center > table > tbody > tr:first-child > td {
+    font-size: 120%;
+    -moz-border-radius: 5px;
+    -moz-box-shadow: 0 0 10px rgba(0,0,0,0.5);
+  }
+
+  .title a {
+    font-family: Museo !important;
+  }
+
+  .title a:visited {
+    color: #666 !important;
+  }
+
+  .comment,
+  .comhead {
+    font-size: 120% !important;
+  }
+
+  .title .comhead {
+    font-size: 85% !important;
+  }
+
+  .pagetop {
+    display: block;
+    padding: 6px 0 4px;
+    font-size: 110% !important;
+  }
+
+  .pagetop a {
+    font-family: Helvetica !important;
+    color: rgba(0,0,0,0.6) !important;
+    font-size: 110% !important;
+  }
+
+  img[src=http\:\/\/ycombinator\.com\/images\/y18\.gif] {
+    margin: 0 2px 0 5px;
+  }
+
