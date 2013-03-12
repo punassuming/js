@@ -67,18 +67,18 @@ div.expl-result {
   #nav { margin-bottom: 7px !important; }
   #nav td, #pagination td, table.gooooogle td { padding:3px !important; }
   #nav + div + div { margin-top:0px !important; }
-  /* #nav + div, div.r { display:none !important; } */
+  #nav + div, div.r { display:none !important; }
   div.footer { padding: 0px!important; }
   #nav .pn span { margin-right: 5px !important; }
   #nav .pn span { margin-left: 5px !important; }
 
-/* #nav */
-/* { */
-/* 	position: absolute !important; */
-/* 	top: 28px !important; */
-/* 	right: 13px !important; */
-/* 	text-transform: uppercase !important; */
-/* } */
+#nav
+{
+	position: absolute !important;
+	top: 28px !important;
+	right: 13px !important;
+	text-transform: uppercase !important;
+}
 
 /* -----------------------------------------------
  * Paragraphs each containing a result of the search

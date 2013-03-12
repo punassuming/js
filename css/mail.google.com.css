@@ -78,3 +78,11 @@ text-align: center !important;
 
 /* background-color: #DDE !important;} */
 
+/* alternate colors of row */
+div.h7:nth-of-type(odd) div.adn.ads, div.kv:nth-of-type(odd){ background-color: rgba(0,0,255,0.05); }
+    div.kv div.G2 { background-color: transparent !important; }
+
+/* contrast read and unread */
+/* .yO:not(.x7):not(.yQ) { background-color: rgba(230, 230, 230, 0.85) !important; } */
+    /* .xY { border-bottom: 1px solid rgb(216, 216, 216) !important; } */
+    /* .yO, .yO .y2 { color: rgb(145,145,145) !important; } */

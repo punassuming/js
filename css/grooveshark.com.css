@@ -1,0 +1,32 @@
+.capital,
+.capital-column,
+.decoupledCapital,
+.external-links,
+.jj_menu_item_share,
+.jj_menu_item_visualizer,
+.menu-item[href="/#!/community"],
+.page-nav-link[href="/#!/community"],
+.song-row-share,
+#np-share,
+.title-crossfade-queue,
+#column2,
+#theme-header,
+#theme-wall {
+	display: none !important;
+	height: 0px !important;
+	width: 0px !important
+}
+
+.small-home-section,
+#column1,
+#grid-toolbar-container {
+	width: 100% !important
+}
+
+#grid-toolbar-container .sticky .grid-toolbar-inner {
+	width: 950px;
+}
+
+#page-wrapper {
+	background-color: #EEEEEE;
+}

@@ -1,0 +1,112 @@
+#content .wrapper,
+#page_reader,
+body {
+    background-color: #111 !important;
+}
+
+#page_queue {width: auto; 
+ }
+
+#page nav { border-color:#111 !important; }
+
+#subnav, .queue {
+    background: none !important;
+}
+
+.list > #queue_list_wrapper > .queue_list > li{
+    /* -webkit-column-gap: 50px; */
+    /* -webkit-column-count: 2; */
+    /* -webkit-column-rule-color:  #ccc; */
+    /* -webkit-column-rule-style: solid ; */
+    /* -webkit-column-rule-width:  1px; */
+    display: inline-block !important;
+    width: 40%;
+    margin: 10px !important;
+    height: 56px;
+    overflow: hidden;
+}
+
+.list > #queue_list_wrapper > .queue_list > li:nth-child(2n+1){
+    clear:left !important;
+}
+
+#page #content .wrapper.tag_sidebar_holder {background-image: none !important;}
+ 
+#content .wrapper
+{
+    border-left: none !important;
+    width: auto;
+    border-right: 0px solid #e8e6e6 !important;
+}
+
+.grid.tag_sidebar_open .item { width: 280px; }
+.grid.tag_sidebar_open .item[tileType=wide_image], .grid.tag_sidebar_open .item[tileType=wide_split] {width: 580px;}
+
+.tag_sidebar_visible {
+    background: black;
+    border-left: white 2px solid;
+    /* top: 0px !important; */ 
+}
+.pinned .sidebar_wrapper
+{
+right: 0px !important;/* right: 0px; */
+width: auto !important;
+}
+
+.grid .queue_list .item,.tag_sidebar_invisible,
+.tag_sidebar_visible {
+ -webkit-transition: none !important;   }
+
+.queue_list {width: 100%; margin: 0 auto; text-align:center !important;  }
+
+.grid .queue_list .item {display: inline-block !important; float: none !important; vertical-align: top !important; text-align: left !important;}
+
+.info {display:none !important; padding: 0 !important; visibility: hidden;}
+
+.queue_list .item,
+.grid .queue_list .item  {
+border-color:#000;
+}
+
+#page_search {
+background:#111;
+border:1px solid #000 !important;
+box-shadow: 1px 1px 1px rgba(100, 100, 100, 0.67), inset 1px 1px 2px 0px rgba(0, 0, 0, 0.25);
+}
+
+.grid .queue_list .item *,
+.grid .queue_list .item .title,
+.queue_list .item,
+.grid .queue_list .item {
+color:#aaa !important;
+background-color:#222 !important;
+}
+
+.queue_list .title,
+#page_search,
+.queue_list .link {
+color:#bbb !important;
+text-align: left !important;
+}
+
+
+.title {padding-top: 0px !important;}
+
+.grid .queue_list > li
+{
+-webkit-border-radius: 8px !important;
+border: #222 3px solid !important;
+}
+  
+.grid .queue_list .item:hover .title span { color:#f90 !important; }
+
+.grid .queue_list .item:hover .buttons
+{
+	background: #222 !important;
+	box-shadow: -10px 0px 5px -2px #222 !important;
+}
+
+
+.reader_content {
+    width: 80% !important;
+}
